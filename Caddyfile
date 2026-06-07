@@ -1,0 +1,12 @@
+{$CADDY_SITE_ADDRESS} {
+  encode gzip zstd
+
+  @health path /healthz
+  handle @health {
+    reverse_proxy {$API_UPSTREAM}
+  }
+
+  handle {
+    reverse_proxy {$API_UPSTREAM}
+  }
+}

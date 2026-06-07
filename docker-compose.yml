@@ -1,0 +1,107 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: ./api
+    deploy:
+      mode: replicated
+      replicas: ${API_REPLICAS:-4}
+    environment:
+      NODE_ENV: production
+      PORT: ${API_PORT_INTERNAL:-3000}
+
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+
+      # JWT issue config
+      JWT_TTL_SECONDS: ${JWT_TTL_SECONDS:-15552000}         # 180d
+      JWT_ISSUER: ${JWT_ISSUER:-medical-sync-vault}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-sync-vault}
+
+      # Harden /auth/issue
+      APP_ISSUE_TOKEN: ${APP_ISSUE_TOKEN}
+      ADMIN_STATS_TOKEN: ${ADMIN_STATS_TOKEN:-}
+      BUNDLE_CIPHER_CURRENT_KID: ${BUNDLE_CIPHER_CURRENT_KID}
+      BUNDLE_CIPHER_CURRENT_SECRET: ${BUNDLE_CIPHER_CURRENT_SECRET}
+      BUNDLE_CIPHER_PREVIOUS_KID: ${BUNDLE_CIPHER_PREVIOUS_KID}
+      BUNDLE_CIPHER_PREVIOUS_SECRET: ${BUNDLE_CIPHER_PREVIOUS_SECRET}
+
+      MAX_BATCH_EVENTS: ${MAX_BATCH_EVENTS}
+      MAX_PULL_LIMIT: ${MAX_PULL_LIMIT}
+    depends_on:
+      db:
+        condition: service_healthy
+    # No host ports. Caddy load-balances over Docker DNS.
+    expose:
+      - "${API_PORT_INTERNAL:-3000}"
+
+  backup:
+    build:
+      context: ./backup
+    profiles:
+      - backup
+    restart: unless-stopped
+    init: true
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+      RESTIC_REPOSITORY: ${BACKUP_RESTIC_REPOSITORY:-}
+      RESTIC_PASSWORD: ${BACKUP_RESTIC_PASSWORD:-}
+      RESTIC_CACHE_DIR: /cache/restic
+      AWS_ACCESS_KEY_ID: ${BACKUP_S3_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${BACKUP_S3_SECRET_ACCESS_KEY:-}
+      AWS_DEFAULT_REGION: ${BACKUP_S3_REGION:-us-east-1}
+
+      BACKUP_DATABASE_NAME: ${BACKUP_DATABASE_NAME:-syncvault}
+      BACKUP_RESTIC_HOSTNAME: ${BACKUP_RESTIC_HOSTNAME:-sync-vault}
+      BACKUP_INTERVAL_SECONDS: ${BACKUP_INTERVAL_SECONDS:-21600}
+      BACKUP_RUN_ON_START: ${BACKUP_RUN_ON_START:-true}
+      BACKUP_RETENTION_DAILY: ${BACKUP_RETENTION_DAILY:-14}
+      BACKUP_RETENTION_WEEKLY: ${BACKUP_RETENTION_WEEKLY:-8}
+      BACKUP_RETENTION_MONTHLY: ${BACKUP_RETENTION_MONTHLY:-3}
+      BACKUP_RUN_CHECK_AFTER_BACKUP: ${BACKUP_RUN_CHECK_AFTER_BACKUP:-false}
+    volumes:
+      - backup_cache:/cache
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+
+  caddy:
+    image: caddy:2-alpine
+    depends_on:
+      - api
+    ports:
+      - "${CADDY_HTTP_PORT:-80}:80"
+      - "${CADDY_HTTPS_PORT:-443}:443"
+    environment:
+      CADDY_SITE_ADDRESS: ${CADDY_SITE_ADDRESS:-:80}
+      API_UPSTREAM: ${API_UPSTREAM:-api:3000}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  db_data:
+  backup_cache:
+  caddy_data:
+  caddy_config:

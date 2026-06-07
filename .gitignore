@@ -1,0 +1,62 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment / Secrets
+.env
+.env.*
+!.env.example
+
+# Node / TypeScript
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output
+dist/
+build/
+
+# Docker
+# Local docker volumes (if mounted locally)
+db_data/
+caddy_data/
+caddy_config/
+
+# Docker override files (local only)
+docker-compose.override.yml
+
+# Logs
+logs/
+*.log
+
+# PostgreSQL
+*.sql~
+*.dump
+*.backup
+
+# Runtime / Temp
+tmp/
+temp/
+.cache/
+
+# Security / Certificates
+*.pem
+*.key
+*.crt
+
+# macOS specific
+.AppleDouble
+.LSOverride
+
+# Windows specific
+Desktop.ini
+$RECYCLE.BIN/
+
+# Claude Code
+.claude/
