@@ -125,17 +125,17 @@ The service uses:
 Hetzner Object Storage repository examples:
 
 ```text
+s3:hel1.your-objectstorage.com/<bucket>/prod
 s3:fsn1.your-objectstorage.com/<bucket>/prod
 s3:nbg1.your-objectstorage.com/<bucket>/prod
-s3:hel1.your-objectstorage.com/<bucket>/prod
 ```
 
 Production `.env` example:
 
 ```env
 COMPOSE_PROFILES=backup
-BACKUP_RESTIC_REPOSITORY=s3:fsn1.your-objectstorage.com/tenos-sync-vault-backups/prod
-BACKUP_S3_REGION=fsn1
+BACKUP_RESTIC_REPOSITORY=s3:hel1.your-objectstorage.com/tenos-sync-vault-backups/prod
+BACKUP_S3_REGION=hel1
 BACKUP_S3_ACCESS_KEY_ID=<access-key>
 BACKUP_S3_SECRET_ACCESS_KEY=<secret-key>
 BACKUP_RESTIC_PASSWORD=<long-random-restic-password>
@@ -151,9 +151,22 @@ Start the production stack with backups:
 docker compose up -d --build
 ```
 
+This starts the backup container only when the server `.env` contains:
+
+```env
+COMPOSE_PROFILES=backup
+```
+
+Alternatively, start it explicitly without relying on `.env`:
+
+```bash
+docker compose --profile backup up -d --build
+```
+
 Check backup logs:
 
 ```bash
+docker compose ps backup
 docker compose logs --tail=100 backup
 ```
 

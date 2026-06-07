@@ -208,6 +208,18 @@ The response contains aggregate counts only. It must not contain subject IDs, de
 
 The production backup service is enabled through the `backup` Compose profile. It writes encrypted Restic snapshots to S3-compatible object storage.
 
+If the server `.env` contains `COMPOSE_PROFILES=backup`, the normal production start command is enough:
+
+```bash
+docker compose up -d --build
+```
+
+Without `COMPOSE_PROFILES=backup`, start the backup service explicitly:
+
+```bash
+docker compose --profile backup up -d --build
+```
+
 Check that the service is running:
 
 ```bash
