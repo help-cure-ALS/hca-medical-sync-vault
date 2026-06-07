@@ -125,16 +125,17 @@ The service uses:
 Hetzner Object Storage repository examples:
 
 ```text
-s3:https://fsn1.your-objectstorage.com/<bucket>/prod
-s3:https://nbg1.your-objectstorage.com/<bucket>/prod
-s3:https://hel1.your-objectstorage.com/<bucket>/prod
+s3:fsn1.your-objectstorage.com/<bucket>/prod
+s3:nbg1.your-objectstorage.com/<bucket>/prod
+s3:hel1.your-objectstorage.com/<bucket>/prod
 ```
 
 Production `.env` example:
 
 ```env
 COMPOSE_PROFILES=backup
-BACKUP_RESTIC_REPOSITORY=s3:https://fsn1.your-objectstorage.com/tenos-sync-vault-backups/prod
+BACKUP_RESTIC_REPOSITORY=s3:fsn1.your-objectstorage.com/tenos-sync-vault-backups/prod
+BACKUP_S3_REGION=fsn1
 BACKUP_S3_ACCESS_KEY_ID=<access-key>
 BACKUP_S3_SECRET_ACCESS_KEY=<secret-key>
 BACKUP_RESTIC_PASSWORD=<long-random-restic-password>
