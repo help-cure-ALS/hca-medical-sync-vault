@@ -41,6 +41,7 @@ services:
 
       MAX_BATCH_EVENTS: ${MAX_BATCH_EVENTS}
       MAX_PULL_LIMIT: ${MAX_PULL_LIMIT}
+      MAX_DEVICES_PER_SUBJECT: ${MAX_DEVICES_PER_SUBJECT:-20}
     depends_on:
       db:
         condition: service_healthy
