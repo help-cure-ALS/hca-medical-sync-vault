@@ -56,8 +56,9 @@ this on cold start and on every foreground transition; installations below
 Values come from the environment variables `MIN_APP_VERSION_IOS`,
 `MIN_APP_VERSION_ANDROID`, `APP_STORE_URL_IOS`, and `APP_STORE_URL_ANDROID`
 (see `.env.example`). Empty or unset values are returned as `null`, which
-disables the gate for that platform. Changes require a container recreate
-(`docker compose up -d api`), not just a restart.
+disables the gate for that platform. Env changes require a container recreate
+(`docker compose up -d api`), not just a restart; code changes additionally
+need an image rebuild (`docker compose up -d --build api`).
 
 Only raise `min_version` after the new app version is live in the respective
 store — review and rollout never finish simultaneously on both platforms,
