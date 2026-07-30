@@ -44,6 +44,34 @@ Returns:
 { "ok": true }
 ```
 
+## App Config
+
+### `GET /app-config`
+
+Public, unauthenticated (rate-limited). Operational metadata for the mobile
+app version gate — no subject, device, or payload relation. The app checks
+this on cold start and on every foreground transition; installations below
+`min_version` show a blocking update screen linking to `store_url`.
+
+Values come from the environment variables `MIN_APP_VERSION_IOS`,
+`MIN_APP_VERSION_ANDROID`, `APP_STORE_URL_IOS`, and `APP_STORE_URL_ANDROID`
+(see `.env.example`). Empty or unset values are returned as `null`, which
+disables the gate for that platform. Changes require a container recreate
+(`docker compose up -d api`), not just a restart.
+
+Only raise `min_version` after the new app version is live in the respective
+store — review and rollout never finish simultaneously on both platforms,
+which is why the values are per platform.
+
+Returns:
+
+```json
+{
+  "min_version": { "ios": "1.1.0", "android": null },
+  "store_url": { "ios": "https://apps.apple.com/app/id123456789", "android": null }
+}
+```
+
 ## Runtime Bundle Cipher
 
 These endpoints provide runtime bundle-cipher material for QR and clipboard transfer bundles. Responses are marked `Cache-Control: no-store`.

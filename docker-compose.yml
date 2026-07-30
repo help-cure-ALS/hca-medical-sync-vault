@@ -42,6 +42,12 @@ services:
       MAX_BATCH_EVENTS: ${MAX_BATCH_EVENTS}
       MAX_PULL_LIMIT: ${MAX_PULL_LIMIT}
       MAX_DEVICES_PER_SUBJECT: ${MAX_DEVICES_PER_SUBJECT:-20}
+
+      # App version gate (/app-config). Empty = gate disabled for that platform.
+      MIN_APP_VERSION_IOS: ${MIN_APP_VERSION_IOS:-}
+      MIN_APP_VERSION_ANDROID: ${MIN_APP_VERSION_ANDROID:-}
+      APP_STORE_URL_IOS: ${APP_STORE_URL_IOS:-}
+      APP_STORE_URL_ANDROID: ${APP_STORE_URL_ANDROID:-}
     depends_on:
       db:
         condition: service_healthy

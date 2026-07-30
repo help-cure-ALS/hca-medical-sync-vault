@@ -108,6 +108,7 @@ The API is documented in [docs/api.md](./docs/api.md).
 The most important endpoint groups are:
 
 - Health: `GET /healthz`
+- App version gate config: `GET /app-config`
 - Subject registration and recovery
 - Challenge/issue proof-of-possession auth
 - Device authorization and revocation

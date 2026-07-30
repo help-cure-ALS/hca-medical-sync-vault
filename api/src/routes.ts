@@ -19,6 +19,14 @@ const BUNDLE_CIPHER_HKDF_SALT = "hca/bundle-cipher-v1";
 const BUNDLE_CIPHER_KEY_BYTES = 32;
 const BUNDLE_CIPHER_KID_RE = /^[A-Za-z0-9._:-]{1,128}$/;
 
+// App version gate: clients below min_version must update via the store.
+// Operational metadata only — no subject, device, or payload relation.
+// Empty/unset env values disable the gate for that platform.
+function appConfigValue(name: string): string | null {
+    const value = process.env[name]?.trim();
+    return value ? value : null;
+}
+
 const EventSchema = z.object({
     event_id: z.string().uuid(),
     device_id: z.string().uuid(),
@@ -317,6 +325,27 @@ const SERVER_RECEIVED_AT_ISO_SQL =
 
 export async function routes(app: FastifyInstance) {
     app.get("/healthz", async () => ({ ok: true }));
+
+    // Public, unauthenticated. The mobile app checks this on cold start and
+    // foreground; values are maintained via env vars (restart to apply).
+    app.get(
+        "/app-config",
+        {
+            config: {
+                rateLimit: { max: 60, timeWindow: "1 minute" }
+            }
+        },
+        async () => ({
+            min_version: {
+                ios: appConfigValue("MIN_APP_VERSION_IOS"),
+                android: appConfigValue("MIN_APP_VERSION_ANDROID")
+            },
+            store_url: {
+                ios: appConfigValue("APP_STORE_URL_IOS"),
+                android: appConfigValue("APP_STORE_URL_ANDROID")
+            }
+        })
+    );
 
     app.get(
         "/admin/stats/summary",
