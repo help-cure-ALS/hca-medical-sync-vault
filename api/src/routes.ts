@@ -318,10 +318,17 @@ function decodeEventSizes(e: any) {
     return { nonce, ciphertext, hash, bytes };
 }
 
-// Stable ISO string from DB (UTC, millisecond precision).
+// Stable ISO string from DB (UTC, MICROSECOND precision).
 // This prevents cursor loops caused by driver Date conversion / rounding / locale differences.
+//
+// Microseconds are required: server_received_at defaults to now(), which is
+// the transaction timestamp — every row of one /events/batch insert shares
+// the exact same microsecond value. A millisecond-truncated cursor compared
+// against the full-precision column re-matches the whole batch on the next
+// page (identical page, identical next cursor), which clients detect as
+// "no progress" and abort — leaving the pull incomplete.
 const SERVER_RECEIVED_AT_ISO_SQL =
-    `to_char(server_received_at at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')`;
+    `to_char(server_received_at at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`;
 
 export async function routes(app: FastifyInstance) {
     app.get("/healthz", async () => ({ ok: true }));
