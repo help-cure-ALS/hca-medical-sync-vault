@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -16,6 +17,7 @@ services:
   api:
     build:
       context: ./api
+    restart: unless-stopped
     deploy:
       mode: replicated
       replicas: ${API_REPLICAS:-4}
@@ -94,6 +96,7 @@ services:
 
   caddy:
     image: caddy:2-alpine
+    restart: unless-stopped
     depends_on:
       - api
     ports:
