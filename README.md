@@ -154,4 +154,4 @@ Please do not report suspected vulnerabilities in public issues. See [SECURITY.m
 
 ## License
 
-[MIT](./LICENSE) (c) [help cure ALS e.V.](https://help-cure-als.org/)
+[AGPL-3.0](./LICENSE) (c) [help cure ALS e.V.](https://help-cure-als.org/)
